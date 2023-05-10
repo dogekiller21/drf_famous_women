@@ -17,21 +17,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 
-from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from women.views import WomenAPIList, WomenAPIUpdate, WomenAPIDestroy
-
-# router = routers.DefaultRouter()  # Returns all viewSets' urls
-# router.register(r"women", WomenViewSet, basename="women")  # basename - Model name
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/session_auth/', include("rest_framework.urls")),
+    path('api/v1/session_auth/', include("rest_framework.urls")),                    # django session auth
     path("api/v1/women/", WomenAPIList.as_view()),
-    path("api/v1/women/<int:pk>", WomenAPIUpdate.as_view()),
+    path("api/v1/women/<int:pk>/", WomenAPIUpdate.as_view()),
     path("api/v1/womendelete/", WomenAPIDestroy.as_view()),
-    path("api/v1/auth/", include("djoser.urls")),
+    path("api/v1/auth/", include("djoser.urls")),                                    # djoser token auth
     re_path(r"^auth/", include("djoser.urls.authtoken")),
-    # path("api/v1/", include(router.urls))
+    path("api/v1/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),  # simple_jwt jwt auth
+    path("api/v1/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/v1/token/vefiry/", TokenVerifyView.as_view(), name="token_verify"),
 ]
