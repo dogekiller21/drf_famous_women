@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -17,15 +18,51 @@ class WomenAPIView(APIView):
     def post(self, request: Request):
         serializer = WomenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        new_post = Women.objects.create(
-            title=request.data["title"],
-            content=request.data["content"],
-            category_id=request.data["category_id"]
-        )
+        serializer.save()  # For CRUD inside serializer
         return Response(
-            {"post": WomenSerializer(new_post).data}
+            {"post": serializer.data}
         )
+
+    def put(self, request: Request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+        if pk is None:
+            return Response(
+                {"error": "Method PUT not allowed"},
+                status=400
+            )
+        try:
+            instance = Women.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Object not found"},
+                status=400
+            )
+        serializer = WomenSerializer(data=request.data, instance=instance)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"post": serializer.data}
+        )
+
+    def delete(self, request: Request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+        if pk is None:
+            return Response(
+                {"error": "Method PUT not allowed"},
+                status=400
+            )
+        try:
+            instance: Women = Women.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Object not found"},
+                status=400
+            )
+        instance.delete()
+        return Response(
+            {"deleted": f"Object with {pk=} was deleted"}
+        )
+
 
 
 # class WomenAPIView(generics.ListAPIView):
