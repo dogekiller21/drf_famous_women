@@ -16,7 +16,7 @@ class WomenAPIListPagination(PageNumberPagination):
 
 
 class WomenMixin:
-    queryset = Women.objects.all()
+    queryset = Women.objects.all().order_by("id")  # order_by to fix "UnorderedObjectListWarning"
     serializer_class = WomenSerializer
 
 
